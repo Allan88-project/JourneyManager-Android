@@ -1,26 +1,35 @@
 package com.allan88.journeymanager.data.repository
 
 import com.allan88.journeymanager.data.model.Trip
-import com.allan88.journeymanager.data.remote.TripApi
+import com.allan88.journeymanager.network.ApiService
 
-class TripRepository(
-    private val api: TripApi
-) {
+class TripRepository(private val apiService: ApiService) {
 
     suspend fun getTrips(): List<Trip> {
-        return api.getTrips()
+        return apiService.getTrips()
     }
 
-    suspend fun createTrip(title: String, description: String): Trip {
-        return api.createTrip(
-            mapOf(
-                "title" to title,
-                "description" to description
-            )
-        )
+    suspend fun submitTrip(data: Map<String, String>) {
+        apiService.createTrip(data)
     }
 
-    suspend fun updateStatus(id: Long, status: String): Trip {
-        return api.updateStatus(id, status)
+    suspend fun startJourney(tripId: Long) {
+        apiService.startJourney(tripId)
+    }
+
+    suspend fun emergency(tripId: Long) {
+        apiService.emergency(tripId)
+    }
+
+    suspend fun completeJourney(tripId: Long) {
+        apiService.completeJourney(tripId)
+    }
+
+    suspend fun approveTrip(tripId: Long) {
+        apiService.updateStatus(tripId, "APPROVED")
+    }
+
+    suspend fun rejectTrip(tripId: Long) {
+        apiService.updateStatus(tripId, "REJECTED")
     }
 }

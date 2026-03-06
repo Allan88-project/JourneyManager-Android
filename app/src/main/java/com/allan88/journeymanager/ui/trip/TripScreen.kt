@@ -1,0 +1,89 @@
+package com.allan88.journeymanager.ui.trip
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.allan88.journeymanager.data.model.Trip
+import com.allan88.journeymanager.data.repository.TripRepository
+import com.allan88.journeymanager.network.ApiClient
+import com.allan88.journeymanager.viewmodel.TripViewModel
+
+@Composable
+fun TripScreen(onBack: () -> Unit) {
+
+    val repository = remember { TripRepository(ApiClient.apiService) }
+    val viewModel = remember { TripViewModel(repository) }
+
+    val trips by viewModel.trips.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadTrips()
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .padding(16.dp)
+    ) {
+
+        Button(onClick = onBack) {
+            Text("BACK")
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+            text = "Journey Manager Console",
+            color = Color.Green,
+            fontSize = 22.sp
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Button(
+            onClick = {
+                viewModel.submitTrip(
+                    mapOf(
+                        "origin" to "Office",
+                        "destination" to "Client Site"
+                    )
+                )
+            }
+        ) {
+            Text("SUBMIT TEST TRIP")
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = "Trips Loaded: ${trips.size}",
+            color = Color.Green
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        LazyColumn {
+
+            items(trips) { trip: Trip ->
+
+                Text(
+                    text = "#${trip.id}  ${trip.title}  [${trip.status}]",
+                    color = Color.Green,
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(vertical = 6.dp)
+                )
+
+            }
+
+        }
+    }
+}

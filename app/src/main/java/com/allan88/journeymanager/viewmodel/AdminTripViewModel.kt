@@ -8,21 +8,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class TripViewModel(private val repository: TripRepository) : ViewModel() {
+class AdminTripViewModel(
+    private val repository: TripRepository
+) : ViewModel() {
 
     private val _trips = MutableStateFlow<List<Trip>>(emptyList())
     val trips: StateFlow<List<Trip>> = _trips
 
     fun loadTrips() {
         viewModelScope.launch {
-            _trips.value = repository.getTrips()
-        }
-    }
-
-    fun submitTrip(data: Map<String, String>) {
-        viewModelScope.launch {
-            repository.submitTrip(data)
-            loadTrips()
+            try {
+                _trips.value = repository.getTrips()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
@@ -36,27 +35,6 @@ class TripViewModel(private val repository: TripRepository) : ViewModel() {
     fun rejectTrip(tripId: Long) {
         viewModelScope.launch {
             repository.rejectTrip(tripId)
-            loadTrips()
-        }
-    }
-
-    fun startJourney(tripId: Long) {
-        viewModelScope.launch {
-            repository.startJourney(tripId)
-            loadTrips()
-        }
-    }
-
-    fun emergency(tripId: Long) {
-        viewModelScope.launch {
-            repository.emergency(tripId)
-            loadTrips()
-        }
-    }
-
-    fun completeJourney(tripId: Long) {
-        viewModelScope.launch {
-            repository.completeJourney(tripId)
             loadTrips()
         }
     }
