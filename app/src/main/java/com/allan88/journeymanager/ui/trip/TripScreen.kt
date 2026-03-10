@@ -15,7 +15,7 @@ import com.allan88.journeymanager.data.model.Trip
 import com.allan88.journeymanager.data.repository.TripRepository
 import com.allan88.journeymanager.network.ApiClient
 import com.allan88.journeymanager.viewmodel.TripViewModel
-
+import kotlinx.coroutines.delay
 @Composable
 fun TripScreen(onBack: () -> Unit) {
 
@@ -25,6 +25,11 @@ fun TripScreen(onBack: () -> Unit) {
     val trips by viewModel.trips.collectAsState()
 
     LaunchedEffect(Unit) {
+
+        while (com.allan88.journeymanager.network.TokenManager.getToken() == null) {
+            delay(100)
+        }
+
         viewModel.loadTrips()
     }
 

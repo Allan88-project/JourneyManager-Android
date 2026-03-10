@@ -1,52 +1,84 @@
 package com.allan88.journeymanager
-import com.allan88.journeymanager.ui.trip.TripScreen
+
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.allan88.journeymanager.network.ApiClient
+import com.allan88.journeymanager.network.TokenManager
 import com.allan88.journeymanager.ui.admin.AdminTripScreen
 import com.allan88.journeymanager.ui.trip.TripScreen
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var btnSubmitTrip: Button
+    private lateinit var btnViewTrips: Button
+    private lateinit var btnAdminPanel: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val btnSubmitTrip = findViewById<Button>(R.id.btnSubmitTrip)
-        val btnViewTrips = findViewById<Button>(R.id.btnViewTrips)
-        val btnAdminPanel = findViewById<Button>(R.id.btnAdminPanel)
+        btnSubmitTrip = findViewById(R.id.btnSubmitTrip)
+        btnViewTrips = findViewById(R.id.btnViewTrips)
+        btnAdminPanel = findViewById(R.id.btnAdminPanel)
 
-        btnSubmitTrip.setOnClickListener {
+        // Disable buttons until login completes
+        btnSubmitTrip.isEnabled = false
+        btnViewTrips.isEnabled = false
+        btnAdminPanel.isEnabled = false
 
-            setContent {
+        loginThenEnableUI()
+    }
 
-                TripScreen(
-                    onBack = {
-                        recreate()
-                    }
-                )
+    private fun loginThenEnableUI() {
 
+        lifecycleScope.launch {
+
+            try {
+
+                val token = withContext(Dispatchers.IO) {
+                    ApiClient.apiService.login(
+                        mapOf(
+                            "email" to "user@tenant1.com",
+                            "password" to "password"
+                        )
+                    )
+                }
+
+                TokenManager.saveToken(token)
+
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
 
-        }
+            // Enable buttons after login attempt
+            btnSubmitTrip.isEnabled = true
+            btnViewTrips.isEnabled = true
+            btnAdminPanel.isEnabled = true
 
-        btnViewTrips.setOnClickListener {
-
-            setContent {
-                TripScreen(
-                    onBack = {
-                        recreate()
-                    }
-                )
+            btnSubmitTrip.setOnClickListener {
+                setContent {
+                    TripScreen(onBack = { recreate() })
+                }
             }
 
-        }
+            btnViewTrips.setOnClickListener {
+                setContent {
+                    TripScreen(onBack = { recreate() })
+                }
+            }
 
-        btnAdminPanel.setOnClickListener {
-            startActivity(Intent(this, AdminTripScreen::class.java))
+            btnAdminPanel.setOnClickListener {
+                startActivity(Intent(this@MainActivity, AdminTripScreen::class.java))
+            }
         }
     }
+
 }

@@ -6,9 +6,17 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
-import retrofit2.http.Query
 
 interface ApiService {
+
+    /**
+     * LOGIN (returns JWT token string)
+     */
+    @POST("api/auth/login")
+    suspend fun login(
+        @Body request: Map<String, String>
+    ): String
+
 
     /**
      * Fetch all trips
@@ -23,7 +31,7 @@ interface ApiService {
     @POST("api/trips")
     suspend fun createTrip(
         @Body request: Map<String, String>
-    )
+    ): Trip
 
 
     /**
@@ -32,7 +40,7 @@ interface ApiService {
     @PUT("api/trips/{id}/start")
     suspend fun startJourney(
         @Path("id") tripId: Long
-    )
+    ): Trip
 
 
     /**
@@ -41,7 +49,7 @@ interface ApiService {
     @PUT("api/trips/{id}/emergency")
     suspend fun emergency(
         @Path("id") tripId: Long
-    )
+    ): Trip
 
 
     /**
@@ -50,15 +58,23 @@ interface ApiService {
     @PUT("api/trips/{id}/complete")
     suspend fun completeJourney(
         @Path("id") tripId: Long
-    )
+    ): Trip
 
 
     /**
-     * Approve / Reject trip
+     * ADMIN approve trip
      */
-    @PUT("api/trips/{id}/status")
-    suspend fun updateStatus(
-        @Path("id") tripId: Long,
-        @Query("status") status: String
-    )
+    @PUT("api/trips/{id}/approve")
+    suspend fun approveTrip(
+        @Path("id") tripId: Long
+    ): Trip
+
+
+    /**
+     * ADMIN reject trip
+     */
+    @PUT("api/trips/{id}/reject")
+    suspend fun rejectTrip(
+        @Path("id") tripId: Long
+    ): Trip
 }

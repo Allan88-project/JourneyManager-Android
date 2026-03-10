@@ -9,27 +9,27 @@ class TripRepository(private val apiService: ApiService) {
         return apiService.getTrips()
     }
 
-    suspend fun submitTrip(data: Map<String, String>) {
-        apiService.createTrip(data)
+    suspend fun submitTrip(data: Map<String, String>): Trip {
+        return apiService.createTrip(data)
     }
 
-    suspend fun startJourney(tripId: Long) {
-        apiService.startJourney(tripId)
+    suspend fun startJourney(tripId: Long): Trip {
+        return apiService.startJourney(tripId)
     }
 
-    suspend fun emergency(tripId: Long) {
-        apiService.emergency(tripId)
+    suspend fun emergency(tripId: Long): Trip {
+        return apiService.emergency(tripId)
     }
 
-    suspend fun completeJourney(tripId: Long) {
-        apiService.completeJourney(tripId)
+    suspend fun completeJourney(tripId: Long): Trip {
+        return apiService.completeJourney(tripId)
     }
 
-    suspend fun approveTrip(tripId: Long) {
-        apiService.updateStatus(tripId, "APPROVED")
+    suspend fun approveTrip(tripId: Long): Trip {
+        return apiService.approveTrip(tripId)
     }
 
-    suspend fun rejectTrip(tripId: Long) {
-        apiService.updateStatus(tripId, "REJECTED")
+    suspend fun rejectTrip(tripId: Long): Trip {
+        return apiService.rejectTrip(tripId)
     }
 }
