@@ -7,16 +7,28 @@ class AuthInterceptor : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
 
-        val request = chain.request()
+        println("AUTH INTERCEPTOR EXECUTING")
 
-        val builder = request.newBuilder()
+        val originalRequest = chain.request()
 
         val token = TokenManager.getToken()
 
-        if (token != null) {
-            builder.addHeader("Authorization", "Bearer $token")
+        println("TOKEN FROM MANAGER -> $token")
+
+        val requestBuilder = originalRequest.newBuilder()
+
+        if (!token.isNullOrBlank()) {
+
+            requestBuilder.addHeader(
+                "Authorization",
+                "Bearer $token"
+            )
+
+            println("JWT SENT -> Bearer $token")
         }
 
-        return chain.proceed(builder.build())
+        val request = requestBuilder.build()
+
+        return chain.proceed(request)
     }
 }

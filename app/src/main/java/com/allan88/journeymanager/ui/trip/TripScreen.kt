@@ -11,22 +11,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.allan88.journeymanager.data.model.Trip
 import com.allan88.journeymanager.data.repository.TripRepository
 import com.allan88.journeymanager.network.ApiClient
+import com.allan88.journeymanager.network.TokenManager
 import com.allan88.journeymanager.viewmodel.TripViewModel
 import kotlinx.coroutines.delay
-@Composable
-fun TripScreen(onBack: () -> Unit) {
 
-    val repository = remember { TripRepository(ApiClient.apiService) }
-    val viewModel = remember { TripViewModel(repository) }
+@Composable
+fun TripScreen(
+    onBack: () -> Unit
+) {
+
+    val repository = remember {
+        TripRepository(ApiClient.apiService)
+    }
+
+    val viewModel = remember {
+        TripViewModel(repository)
+    }
 
     val trips by viewModel.trips.collectAsState()
 
     LaunchedEffect(Unit) {
 
-        while (com.allan88.journeymanager.network.TokenManager.getToken() == null) {
+        // Wait until JWT token exists
+        while (TokenManager.getToken() == null) {
             delay(100)
         }
 
@@ -58,8 +67,8 @@ fun TripScreen(onBack: () -> Unit) {
             onClick = {
                 viewModel.submitTrip(
                     mapOf(
-                        "origin" to "Office",
-                        "destination" to "Client Site"
+                        "title" to "Test Trip",
+                        "description" to "Office to Client Site"
                     )
                 )
             }
@@ -78,17 +87,15 @@ fun TripScreen(onBack: () -> Unit) {
 
         LazyColumn {
 
-            items(trips) { trip: Trip ->
+            items(trips) { trip ->
 
-                Text(
-                    text = "#${trip.id}  ${trip.title}  [${trip.status}]",
-                    color = Color.Green,
-                    fontSize = 16.sp,
-                    modifier = Modifier.padding(vertical = 6.dp)
+                TripItem(
+                    trip = trip,
+                    viewModel = viewModel,
+                    isAdmin = false   // USER VIEW
                 )
 
             }
-
         }
     }
 }

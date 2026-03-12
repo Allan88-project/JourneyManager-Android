@@ -2,13 +2,13 @@ package com.allan88.journeymanager.network
 
 object TokenManager {
 
-    private var jwt: String? = null
+    private var token: String? = null
 
-    fun saveToken(token: String) {
-        jwt = token
+    fun saveToken(jwt: String) {
+        token = jwt
     }
 
     fun getToken(): String? {
-        return jwt
+        return token
     }
 }

@@ -1,84 +1,82 @@
 package com.allan88.journeymanager
 
-import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
+import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.*
 import androidx.lifecycle.lifecycleScope
 import com.allan88.journeymanager.network.ApiClient
 import com.allan88.journeymanager.network.TokenManager
 import com.allan88.journeymanager.ui.admin.AdminTripScreen
 import com.allan88.journeymanager.ui.trip.TripScreen
-import kotlinx.coroutines.Dispatchers
+import com.allan88.journeymanager.ui.common.MenuScreen
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.allan88.journeymanager.ui.common.RoleSelectionScreen
 
-class MainActivity : AppCompatActivity() {
-
-    private lateinit var btnSubmitTrip: Button
-    private lateinit var btnViewTrips: Button
-    private lateinit var btnAdminPanel: Button
+class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        btnSubmitTrip = findViewById(R.id.btnSubmitTrip)
-        btnViewTrips = findViewById(R.id.btnViewTrips)
-        btnAdminPanel = findViewById(R.id.btnAdminPanel)
-
-        // Disable buttons until login completes
-        btnSubmitTrip.isEnabled = false
-        btnViewTrips.isEnabled = false
-        btnAdminPanel.isEnabled = false
-
-        loginThenEnableUI()
-    }
-
-    private fun loginThenEnableUI() {
 
         lifecycleScope.launch {
 
             try {
 
-                val token = withContext(Dispatchers.IO) {
-                    ApiClient.apiService.login(
-                        mapOf(
-                            "email" to "user@tenant1.com",
-                            "password" to "password"
-                        )
+                // Login request
+                val token = ApiClient.apiService.login(
+                    mapOf(
+                        "email" to "admin@tenant1.com",
+                        "password" to "password"
                     )
-                }
+                )
 
-                TokenManager.saveToken(token)
+                Log.d("AUTH", "TOKEN RECEIVED: $token")
+
+                if (!token.isNullOrBlank()) {
+
+                    TokenManager.saveToken(token)
+
+                    Log.d("AUTH", "TOKEN SAVED SUCCESSFULLY")
+
+                } else {
+
+                    Log.e("AUTH", "TOKEN IS NULL OR EMPTY")
+
+                }
 
             } catch (e: Exception) {
-                e.printStackTrace()
+
+                Log.e("AUTH", "Login failed", e)
+
             }
 
-            // Enable buttons after login attempt
-            btnSubmitTrip.isEnabled = true
-            btnViewTrips.isEnabled = true
-            btnAdminPanel.isEnabled = true
-
-            btnSubmitTrip.setOnClickListener {
-                setContent {
-                    TripScreen(onBack = { recreate() })
-                }
-            }
-
-            btnViewTrips.setOnClickListener {
-                setContent {
-                    TripScreen(onBack = { recreate() })
-                }
-            }
-
-            btnAdminPanel.setOnClickListener {
-                startActivity(Intent(this@MainActivity, AdminTripScreen::class.java))
+            // Load UI after login attempt
+            setContent {
+                MainMenu()
             }
         }
     }
+}
 
+@Composable
+fun MainMenu() {
+
+    var screen by remember { mutableStateOf("role") }
+
+    when (screen) {
+
+        "role" -> RoleSelectionScreen(
+            onUserSelected = { screen = "userTrips" },
+            onAdminSelected = { screen = "adminTrips" }
+        )
+
+        "userTrips" -> TripScreen(
+            onBack = { screen = "role" }
+        )
+
+        "adminTrips" -> AdminTripScreen(
+            onBack = { screen = "role" }
+        )
+    }
 }

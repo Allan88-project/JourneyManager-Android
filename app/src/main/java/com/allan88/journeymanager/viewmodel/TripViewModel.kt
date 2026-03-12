@@ -15,49 +15,96 @@ class TripViewModel(private val repository: TripRepository) : ViewModel() {
 
     fun loadTrips() {
         viewModelScope.launch {
-            _trips.value = repository.getTrips()
+            try {
+                _trips.value = repository.getTrips()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
     fun submitTrip(data: Map<String, String>) {
+
         viewModelScope.launch {
-            repository.submitTrip(data)
-            loadTrips()
+
+            try {
+
+                println("Submitting trip...")
+
+                repository.submitTrip(data)
+
+                println("Trip created successfully")
+
+                loadTrips()
+
+            } catch (e: Exception) {
+
+                println("Trip creation FAILED")
+                e.printStackTrace()
+            }
         }
     }
 
+    // =========================
+    // ADMIN ACTIONS
+    // =========================
+
     fun approveTrip(tripId: Long) {
         viewModelScope.launch {
-            repository.approveTrip(tripId)
-            loadTrips()
+            try {
+                repository.approveTrip(tripId)
+                loadTrips()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
     fun rejectTrip(tripId: Long) {
         viewModelScope.launch {
-            repository.rejectTrip(tripId)
-            loadTrips()
+            try {
+                repository.rejectTrip(tripId)
+                loadTrips()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
+    // =========================
+    // USER ACTIONS
+    // =========================
+
     fun startJourney(tripId: Long) {
         viewModelScope.launch {
-            repository.startJourney(tripId)
-            loadTrips()
+            try {
+                repository.startJourney(tripId)
+                loadTrips()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
     fun emergency(tripId: Long) {
         viewModelScope.launch {
-            repository.emergency(tripId)
-            loadTrips()
+            try {
+                repository.emergency(tripId)
+                loadTrips()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
     fun completeJourney(tripId: Long) {
         viewModelScope.launch {
-            repository.completeJourney(tripId)
-            loadTrips()
+            try {
+                repository.completeJourney(tripId)
+                loadTrips()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }

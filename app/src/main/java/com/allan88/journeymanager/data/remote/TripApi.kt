@@ -18,4 +18,34 @@ interface TripApi {
         @Path("id") id: Long,
         @Query("status") status: String
     ): Trip
+
+
+    // ================================
+    // TRIP LIFECYCLE OPERATIONS
+    // ================================
+
+    @POST("api/trips/{id}/approve")
+    suspend fun approveTrip(
+        @Path("id") id: Long
+    ): Trip
+
+    @POST("api/trips/{id}/reject")
+    suspend fun rejectTrip(
+        @Path("id") id: Long
+    ): Trip
+
+    @POST("api/trips/{id}/start")
+    suspend fun startTrip(
+        @Path("id") id: Long
+    ): Trip
+
+    @POST("api/trips/{id}/complete")
+    suspend fun completeTrip(
+        @Path("id") id: Long
+    ): Trip
+
+    @POST("api/trips/{id}/emergency")
+    suspend fun emergencyTrip(
+        @Path("id") id: Long
+    ): Trip
 }
