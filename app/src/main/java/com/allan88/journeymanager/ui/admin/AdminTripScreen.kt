@@ -23,6 +23,7 @@ import com.google.gson.Gson
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.compose.foundation.layout.Arrangement
 
 @Composable
 fun AdminTripScreen(
@@ -67,7 +68,7 @@ fun AdminTripScreen(
 
         viewModel.loadTrips()
 
-        // Polling fallback (kept for safety)
+        // Polling fallback
         while (true) {
 
             delay(3000)
@@ -91,7 +92,7 @@ fun AdminTripScreen(
     }
 
     /*
-     * Dashboard counters from backend analytics
+     * Dashboard counters
      */
 
     val pending = analytics?.pending ?: 0

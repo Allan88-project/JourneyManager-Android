@@ -10,9 +10,8 @@ import com.allan88.journeymanager.network.ApiClient
 import com.allan88.journeymanager.network.TokenManager
 import com.allan88.journeymanager.ui.admin.AdminTripScreen
 import com.allan88.journeymanager.ui.trip.TripScreen
-import com.allan88.journeymanager.ui.common.MenuScreen
-import kotlinx.coroutines.launch
 import com.allan88.journeymanager.ui.common.RoleSelectionScreen
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
@@ -23,7 +22,7 @@ class MainActivity : ComponentActivity() {
 
             try {
 
-                // Login request
+                // Perform login
                 val token = ApiClient.apiService.login(
                     mapOf(
                         "email" to "user@tenant1.com",
@@ -31,23 +30,21 @@ class MainActivity : ComponentActivity() {
                     )
                 )
 
-                Log.d("AUTH", "TOKEN RECEIVED: $token")
-
                 if (!token.isNullOrBlank()) {
 
                     TokenManager.saveToken(token)
 
-                    Log.d("AUTH", "TOKEN SAVED SUCCESSFULLY")
+                    Log.d("AUTH", "TOKEN SAVED: $token")
 
                 } else {
 
-                    Log.e("AUTH", "TOKEN IS NULL OR EMPTY")
+                    Log.e("AUTH", "TOKEN RECEIVED BUT EMPTY")
 
                 }
 
             } catch (e: Exception) {
 
-                Log.e("AUTH", "Login failed", e)
+                Log.e("AUTH", "LOGIN FAILED", e)
 
             }
 
@@ -57,6 +54,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
 }
 
 @Composable
@@ -79,4 +77,5 @@ fun MainMenu() {
             onBack = { screen = "role" }
         )
     }
+
 }
