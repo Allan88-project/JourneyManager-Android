@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
                 // Login request
                 val token = ApiClient.apiService.login(
                     mapOf(
-                        "email" to "admin@tenant1.com",
+                        "email" to "user@tenant1.com",
                         "password" to "password"
                     )
                 )
