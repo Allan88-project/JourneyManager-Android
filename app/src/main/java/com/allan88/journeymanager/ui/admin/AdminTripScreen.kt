@@ -16,8 +16,10 @@ import com.allan88.journeymanager.data.model.Trip
 import com.allan88.journeymanager.data.model.AdminAnalyticsResponse
 import com.allan88.journeymanager.data.repository.TripRepository
 import com.allan88.journeymanager.network.ApiClient
+import com.allan88.journeymanager.network.websocket.WebSocketManager
 import com.allan88.journeymanager.viewmodel.TripViewModel
 import com.allan88.journeymanager.ui.trip.TripItem
+import com.google.gson.Gson
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -31,37 +33,67 @@ fun AdminTripScreen(
         TripRepository(ApiClient.apiService)
     }
 
+    val webSocketManager = remember { WebSocketManager() }
+
     val viewModel = remember {
         TripViewModel(repository)
     }
 
     val trips by viewModel.trips.collectAsState()
 
-// NEW: Analytics state
+// Analytics state
     var analytics by remember { mutableStateOf<AdminAnalyticsResponse?>(null) }
+
+    /*
+     * WebSocket connection (LIVE updates)
+     */
 
     LaunchedEffect(Unit) {
 
-        // Load analytics once
+        webSocketManager.connect(
+            "ws://192.168.1.5:8081/ws"
+        ) { message ->
+
+            val updatedAnalytics =
+                Gson().fromJson(message, AdminAnalyticsResponse::class.java)
+
+            analytics = updatedAnalytics
+        }
+
+        // Initial analytics load
         analytics = withContext(Dispatchers.IO) {
             ApiClient.apiService.getAdminAnalytics()
         }
 
         viewModel.loadTrips()
 
+        // Polling fallback (kept for safety)
         while (true) {
+
             delay(3000)
 
             viewModel.loadTrips()
 
-            // Refresh analytics every poll cycle
             analytics = withContext(Dispatchers.IO) {
                 ApiClient.apiService.getAdminAnalytics()
             }
         }
     }
 
-// Counters now come from backend analytics
+    /*
+     * Close WebSocket when leaving screen
+     */
+
+    DisposableEffect(Unit) {
+        onDispose {
+            webSocketManager.disconnect()
+        }
+    }
+
+    /*
+     * Dashboard counters from backend analytics
+     */
+
     val pending = analytics?.pending ?: 0
     val approved = analytics?.approved ?: 0
     val rejected = analytics?.rejected ?: 0
@@ -97,9 +129,9 @@ fun AdminTripScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // =========================
-        // DASHBOARD
-        // =========================
+        /*
+         * DASHBOARD
+         */
 
         DashboardCard("Pending", pending.toInt())
         DashboardCard("Approved", approved.toInt())
