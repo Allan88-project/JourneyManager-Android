@@ -1,9 +1,13 @@
 package com.allan88.journeymanager.network
 
+import com.allan88.journeymanager.data.model.AdminAnalyticsResponse
 import com.allan88.journeymanager.data.model.Trip
 import retrofit2.http.*
 
 interface ApiService {
+
+    @GET("api/admin/analytics")
+    suspend fun getAdminAnalytics(): AdminAnalyticsResponse
 
     @POST("api/auth/login")
     suspend fun login(
@@ -42,4 +46,5 @@ interface ApiService {
     suspend fun emergencyTrip(
         @Path("id") id: Long
     ): ApiResponse<Trip>
+
 }

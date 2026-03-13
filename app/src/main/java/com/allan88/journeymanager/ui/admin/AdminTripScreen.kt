@@ -13,11 +13,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.allan88.journeymanager.data.model.Trip
+import com.allan88.journeymanager.data.model.AdminAnalyticsResponse
 import com.allan88.journeymanager.data.repository.TripRepository
 import com.allan88.journeymanager.network.ApiClient
 import com.allan88.journeymanager.viewmodel.TripViewModel
 import com.allan88.journeymanager.ui.trip.TripItem
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun AdminTripScreen(
@@ -34,21 +37,37 @@ fun AdminTripScreen(
 
     val trips by viewModel.trips.collectAsState()
 
+// NEW: Analytics state
+    var analytics by remember { mutableStateOf<AdminAnalyticsResponse?>(null) }
+
     LaunchedEffect(Unit) {
+
+        // Load analytics once
+        analytics = withContext(Dispatchers.IO) {
+            ApiClient.apiService.getAdminAnalytics()
+        }
 
         viewModel.loadTrips()
 
         while (true) {
             delay(3000)
+
             viewModel.loadTrips()
+
+            // Refresh analytics every poll cycle
+            analytics = withContext(Dispatchers.IO) {
+                ApiClient.apiService.getAdminAnalytics()
+            }
         }
     }
 
-    val pending = trips.count { it.status == "PENDING" }
-    val approved = trips.count { it.status == "APPROVED" }
-    val inProgress = trips.count { it.status == "IN_PROGRESS" }
-    val completed = trips.count { it.status == "COMPLETED" }
-    val emergency = trips.count { it.status == "EMERGENCY" }
+// Counters now come from backend analytics
+    val pending = analytics?.pending ?: 0
+    val approved = analytics?.approved ?: 0
+    val rejected = analytics?.rejected ?: 0
+    val inProgress = analytics?.inProgress ?: 0
+    val completed = analytics?.completed ?: 0
+    val emergency = analytics?.emergency ?: 0
 
     Column(
         modifier = Modifier
@@ -82,11 +101,12 @@ fun AdminTripScreen(
         // DASHBOARD
         // =========================
 
-        DashboardCard("Pending", pending)
-        DashboardCard("Approved", approved)
-        DashboardCard("In Progress", inProgress)
-        DashboardCard("Completed", completed)
-        DashboardCard("Emergency", emergency)
+        DashboardCard("Pending", pending.toInt())
+        DashboardCard("Approved", approved.toInt())
+        DashboardCard("Rejected", rejected.toInt())
+        DashboardCard("In Progress", inProgress.toInt())
+        DashboardCard("Completed", completed.toInt())
+        DashboardCard("Emergency", emergency.toInt())
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -104,6 +124,7 @@ fun AdminTripScreen(
 
         }
     }
+
 }
 
 @Composable
@@ -132,4 +153,5 @@ fun DashboardCard(
         }
 
     }
+
 }
