@@ -3,8 +3,12 @@ package com.allan88.journeymanager.network
 import com.allan88.journeymanager.data.model.AdminAnalyticsResponse
 import com.allan88.journeymanager.data.model.Trip
 import retrofit2.http.*
-
+import com.allan88.journeymanager.data.model.TripAudit
 interface ApiService {
+    @GET("api/trips/{id}/timeline")
+    suspend fun getTripTimeline(
+        @Path("id") tripId: Long
+    ): List<TripAudit>
 
     @GET("api/admin/analytics")
     suspend fun getAdminAnalytics(): AdminAnalyticsResponse
